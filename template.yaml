@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+
+Globals:
+  Function:
+    Timeout: 10
+
+Resources:
+  MerchantsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: merchants/
+      Handler: app.lambdaHandler
+      Runtime: nodejs14.x
+      Architectures:
+        - x86_64
+      Events:
+        Merchants:
+          Type: Api
+          Properties:
+            Path: /getcost
+            Method: post
+
+Outputs:
+  MerchantsApi:
+    Description: "API Gateway endpoint URL for Prod stage for Merchants function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/merchants/"
+  MerchantsFunction:
+    Description: "Merchants Lambda Function ARN"
+    Value: !GetAtt MerchantsFunction.Arn
+  MerchantsFunctionIamRole:
+    Description: "Implicit IAM Role created for Merchants function"
+    Value: !GetAtt MerchantsFunctionRole.Arn
