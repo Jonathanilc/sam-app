@@ -2,6 +2,7 @@
 const AWS = require("aws-sdk");
 const csvtojson = require("csvtojson");
 const { errorMsg, getCost } = require("./func");
+const BUCKET_NAME = "merchants-app-bucket";
 
 // event handler
 exports.lambdaHandler = async (event, context) => {
@@ -24,7 +25,7 @@ exports.lambdaHandler = async (event, context) => {
     const S3 = new AWS.S3();
 
     const params = {
-      Bucket: "example-test-for-sam",
+      Bucket: BUCKET_NAME,
       Key: "data.csv",
     };
 
