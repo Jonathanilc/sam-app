@@ -25,6 +25,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # Runtime data
+.aws-sam
+samconfig.toml
 pids
 *.pid
 *.seed
