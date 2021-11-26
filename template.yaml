@@ -7,15 +7,25 @@ Globals:
     Timeout: 10
 
 Resources:
-  ServerlessHttpApi:
+  ServerlessGetCostApi:
     Type: AWS::Serverless::Api
     Properties:
       StageName: Prod
       Auth:
-        ApiKeyRequired: true # sets for all methods
+        ApiKeyRequired: true
         UsagePlan:
           CreateUsagePlan: PER_API
-          UsagePlanName: GatewayAuthorization
+          UsagePlanName: GetCostAuthorization
+  
+  ServerlessUploadApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Auth:
+        ApiKeyRequired: true
+        UsagePlan:
+          CreateUsagePlan: PER_API
+          UsagePlanName: UploadAuthorization
 
   MerchantsFunction:
     Type: AWS::Serverless::Function
@@ -39,7 +49,7 @@ Resources:
                   Required: true
                   Caching: true
             RestApiId:
-              Ref: ServerlessHttpApi
+              Ref: ServerlessGetCostApi
 
   UploadToS3Function:
     Type: AWS::Serverless::Function
@@ -62,4 +72,4 @@ Resources:
               - method.request.header.Authorization:
                   Required: true
                   Caching: true
-            RestApiId: !Ref ServerlessHttpApi
+            RestApiId: !Ref ServerlessUploadApi
