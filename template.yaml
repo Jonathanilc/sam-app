@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
 
@@ -7,31 +7,59 @@ Globals:
     Timeout: 10
 
 Resources:
+  ServerlessHttpApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Auth:
+        ApiKeyRequired: true # sets for all methods
+        UsagePlan:
+          CreateUsagePlan: PER_API
+          UsagePlanName: GatewayAuthorization
+
   MerchantsFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: merchants/
-      Handler: app.lambdaHandler
+      Handler: getCost.lambdaHandler
       Runtime: nodejs14.x
-      Policies: 
+      Policies:
         - S3ReadPolicy:
-            BucketName: "*"
+            BucketName: "example-test-for-sam"
       Architectures:
         - x86_64
       Events:
-        Merchants:
+        GetCostEvent:
           Type: Api
           Properties:
             Path: /getcost
-            Method: post
+            Method: POST
+            RequestParameters:
+              - method.request.header.Authorization:
+                  Required: true
+                  Caching: true
+            RestApiId:
+              Ref: ServerlessHttpApi
 
-Outputs:
-  MerchantsApi:
-    Description: "API Gateway endpoint URL for Prod stage for Merchants function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/merchants/"
-  MerchantsFunction:
-    Description: "Merchants Lambda Function ARN"
-    Value: !GetAtt MerchantsFunction.Arn
-  MerchantsFunctionIamRole:
-    Description: "Implicit IAM Role created for Merchants function"
-    Value: !GetAtt MerchantsFunctionRole.Arn
+  UploadToS3Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: merchants/
+      Handler: upload.lambdaHandler
+      Runtime: nodejs14.x
+      Policies:
+        - S3FullAccessPolicy:
+            BucketName: "example-test-for-sam"
+      Architectures:
+        - x86_64
+      Events:
+        UploadEvent:
+          Type: Api
+          Properties:
+            Path: /upload
+            Method: post
+            RequestParameters:
+              - method.request.header.Authorization:
+                  Required: true
+                  Caching: true
+            RestApiId: !Ref ServerlessHttpApi
