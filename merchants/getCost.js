@@ -2,7 +2,7 @@
 const AWS = require("aws-sdk");
 const csvtojson = require("csvtojson");
 const { errorMsg, getCost } = require("./func");
-const BUCKET_NAME = "merchants-app-bucket";
+const BUCKET_NAME = process.env.BucketName;
 
 // event handler
 exports.lambdaHandler = async (event, context) => {
@@ -68,6 +68,9 @@ exports.lambdaHandler = async (event, context) => {
     
     return {
       statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin" : "*"
+      },
       body: JSON.stringify({
         terminalCost,
         transactionCountCost,

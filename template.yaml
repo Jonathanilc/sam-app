@@ -11,8 +11,11 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: Prod
+      Cors:
+        AllowMethods: "'*'"
+        AllowHeaders: "'*'"
+        AllowOrigin: "'*'"
       Auth:
-        ApiKeyRequired: true
         UsagePlan:
           CreateUsagePlan: PER_API
           UsagePlanName: GetCostAuthorization
@@ -21,13 +24,16 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: Prod
+      Cors:
+        AllowMethods: "'*'"
+        AllowHeaders: "'*'"
+        AllowOrigin: "'*'"
       Auth:
-        ApiKeyRequired: true
         UsagePlan:
           CreateUsagePlan: PER_API
           UsagePlanName: UploadAuthorization
 
-  MerchantsFunction:
+  GetCostFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: merchants/
@@ -35,21 +41,22 @@ Resources:
       Runtime: nodejs14.x
       Policies:
         - S3ReadPolicy:
-            BucketName: "merchants-app-bucket"
+            BucketName: "merchants-app-bucket-123"
       Architectures:
         - x86_64
+      Environment:
+        Variables:
+          BucketName: "merchants-app-bucket-123"
       Events:
         GetCostEvent:
           Type: Api
           Properties:
             Path: /getcost
             Method: POST
-            RequestParameters:
-              - method.request.header.Authorization:
-                  Required: true
-                  Caching: true
             RestApiId:
               Ref: ServerlessGetCostApi
+            Auth:
+              ApiKeyRequired: true
 
   UploadToS3Function:
     Type: AWS::Serverless::Function
@@ -58,18 +65,18 @@ Resources:
       Handler: upload.lambdaHandler
       Runtime: nodejs14.x
       Policies:
-        - S3FullAccessPolicy:
-            BucketName: "merchants-app-bucket"
+        - AmazonS3FullAccess
       Architectures:
         - x86_64
+      Environment:
+        Variables:
+          BucketName: "merchants-app-bucket-123"
       Events:
         UploadEvent:
           Type: Api
           Properties:
             Path: /upload
             Method: post
-            RequestParameters:
-              - method.request.header.Authorization:
-                  Required: true
-                  Caching: true
             RestApiId: !Ref ServerlessUploadApi
+            Auth:
+              ApiKeyRequired: true

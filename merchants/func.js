@@ -6,6 +6,9 @@ function calcLinear(x0, y0, x1, y1, x) {
 function errorMsg(msg) {
   return {
     statusCode: 400,
+    headers: {
+      "Access-Control-Allow-Origin" : "*"
+    },
     body: JSON.stringify({
       error: msg,
     }),
